@@ -59,15 +59,18 @@ SELECT id AS product_id
 		, product_Name
 		, list_price
 FROM northwind.products
-WHERE (list_price<20 AND list_price>15);
+WHERE (list_price<20 AND list_price>15)
+ORDER BY list_price DESC;
 
+#BETWEEN 15.00 AND 20.00 ORDER BY
 -- ------------------------------------------------------------------
 -- 7). Product Name & List Price Costing Above Average List Price
 -- ------------------------------------------------------------------
 
 SELECT product_name, list_price
 FROM northwind.products
-WHERE list_price>(SELECT AVG(list_price) from northwind.products);
+WHERE list_price>(SELECT AVG(list_price) from northwind.products)
+ORDER BY list_price DESC;
 
 -- ------------------------------------------------------------------
 -- 8). Product Name & List Price of 10 Most Expensive Products 
@@ -81,16 +84,27 @@ ORDER BY list_price DESC LIMIT 10;
 -- 9). Count of Current and Discontinued Products 
 -- ------------------------------------------------------------------
 
-SELECT COUNT(*)
-FROM northwind.products;
--- ??????
+UPDATE northwind.products SET discontinued = 1 WHERE id = 95;
 
+SELECT CASE discontinued
+		WHEN 1 THEN "yes"
+        ELSE "no"
+	END AS is_discontinued
+, COUNT(*) as product_count
+FROM northwind.products
+GROUP BY discontinued;
+
+UPDATE northwind.products SET discontinued = 0 WHERE id = 95;
 -- ------------------------------------------------------------------
 -- 10). Product Name, Units on Order and Units in Stock
 --      Where Quantity In-Stock is Less Than the Quantity On-Order. 
 -- ------------------------------------------------------------------
 
-
+SELECT product_name
+	, reorder_level AS units_in_stock
+    , target_level AS units_on_order
+FROM northwind.products
+WHERE reorder_level < target_level;
 
 -- ------------------------------------------------------------------
 -- EXTRA CREDIT -----------------------------------------------------
@@ -101,17 +115,26 @@ FROM northwind.products;
 -- 11). Products with Supplier Company & Address Info
 -- ------------------------------------------------------------------
 
-
+SELECT p.product_name
+	, p.list_price AS product_list_price
+    , p.category AS product_category
+    , s.company AS suppier_company
+    , s.address AS supplier_address
+    , s.city AS supplier_city
+    , s.state_province AS supplier_state_province
+    , s.zip_postal_code AS supplier_zip_postal_code
+FROM northwind.suppliers s
+INNER JOIN northwind.products p
+ON s.id = p.supplier_ids;
 
 -- ------------------------------------------------------------------
 -- 12). Number of Products per Category With Less Than 5 Units
 -- ------------------------------------------------------------------
 
--- HOW TO CHECK UNITS?
-SELECT category, COUNT(*)
+SELECT category, COUNT(*) AS units_in_stock
 FROM northwind.products
-WHERE list_price < 5
-GROUP BY category;
+GROUP BY category
+HAVING units_in_stock < 5;
 
 -- ------------------------------------------------------------------
 -- 13). Number of Products per Category Priced Less Than $20.00
@@ -120,4 +143,5 @@ GROUP BY category;
 SELECT category, COUNT(*)
 FROM northwind.products
 WHERE list_price < 20
-GROUP BY category;
+GROUP BY category
+ORDER BY category;
