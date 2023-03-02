@@ -1,4 +1,4 @@
-CREATE DATABASE `sakila_dim_mart` /*!40100 DEFAULT CHARACTER SET latin1 */ /*!80016 DEFAULT ENCRYPTION='N' */;
+#CREATE DATABASE `sakila_dim_mart` /*!40100 DEFAULT CHARACTER SET latin1 */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE sakila_dim_mart;
 
 DROP TABLE IF EXISTS dim_date;
@@ -135,8 +135,76 @@ END//
 
 delimiter ;
 
-CALL PopulateDateDimension('2010/01/01', '2010/12/31');
+CALL PopulateDateDimension('2005/05/24', '2006/02/23');
 
 SELECT * FROM dim_date LIMIT 20;
 
-#ALTER TABLE fact_rentals
+ALTER TABLE fact_rentals
+ADD COLUMN rental_date_key int NOT NULL AFTER rental_date,
+ADD COLUMN payment_date_key int NOT NULL AFTER payment_date,
+ADD COLUMN return_date_key int NOT NULL AFTER return_date,
+ADD COLUMN rental_update_key int NOT NULL AFTER rental_last_update,
+ADD COLUMN inventory_update_key int NOT NULL AFTER inventory_last_update,
+ADD COLUMN payment_update_key int NOT NULL AFTER payment_last_update;
+
+# update date key for rental
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.rental_date) = dd.full_date
+SET fo.rental_date_key = dd.date_key;
+
+# update date key for payment
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.payment_date) = dd.full_date
+SET fo.payment_date_key = dd.date_key;
+
+# update date key for return
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.return_date) = dd.full_date
+SET fo.return_date_key = dd.date_key;
+
+# update date key for rental last update
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.rental_last_update) = dd.full_date
+SET fo.rental_update_key = dd.date_key;
+
+# update date key for inventory last update
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.inventory_last_update) = dd.full_date
+SET fo.inventory_update_key = dd.date_key;
+
+# update date key for payment last update
+UPDATE fact_rentals AS fo
+JOIN dim_date AS dd
+ON DATE(fo.payment_last_update) = dd.full_date
+SET fo.payment_update_key = dd.date_key;
+
+SELECT rental_date
+	, rental_date_key
+    , payment_date
+	, payment_date_key
+    , return_date
+    , return_date_key
+	, rental_last_update
+    , rental_update_key
+	, inventory_last_update
+    , inventory_update_key
+	, payment_last_update
+    , payment_update_key
+FROM fact_rentals
+LIMIT 10;
+
+ALTER TABLE fact_rentals
+DROP COLUMN rental_date,
+DROP COLUMN payment_date,
+DROP COLUMN return_date,
+DROP COLUMN rental_last_update,
+DROP COLUMN inventory_last_update,
+DROP COLUMN payment_last_update;
+
+SELECT * FROM fact_rentals
+LIMIT 10;
