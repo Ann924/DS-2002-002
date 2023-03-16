@@ -139,7 +139,7 @@ CALL PopulateDateDimension('2005/05/24', '2006/02/23');
 
 SELECT * FROM dim_date LIMIT 20;
 
-ALTER TABLE fact_rentals
+/*ALTER TABLE fact_rentals
 ADD COLUMN rental_date_key int NOT NULL AFTER rental_date,
 ADD COLUMN payment_date_key int NOT NULL AFTER payment_date,
 ADD COLUMN return_date_key int NOT NULL AFTER return_date,
@@ -207,4 +207,4 @@ DROP COLUMN inventory_last_update,
 DROP COLUMN payment_last_update;
 
 SELECT * FROM fact_rentals
-LIMIT 10;
+LIMIT 10;*/
